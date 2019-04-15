@@ -1,3 +1,4 @@
 {
-    "python.pythonPath": "/Users/handsome/miniconda3/envs/allennlp/bin/python"
+    "python.pythonPath": "/Users/handsome/miniconda3/envs/allennlp/bin/python",
+    "docker.defaultRegistryPath": "shuailongliang"
 }
