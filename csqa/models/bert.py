@@ -7,22 +7,16 @@
 # @Last Modified time: 2019-04-13 10:26:57
 
 import logging
-from typing import Any, Dict, List
-import numpy as np
+from typing import Any, Dict, List, Optional
 from overrides import overrides
 import torch
-import torch.nn.functional as F
-from torch.nn.functional import nll_loss
 
 from allennlp.common.checks import check_dimensions_match
 from allennlp.data import Vocabulary
 from allennlp.models.model import Model
-from allennlp.modules import Seq2SeqEncoder, TimeDistributed, TextFieldEmbedder
-from allennlp.modules.input_variational_dropout import InputVariationalDropout
-from allennlp.modules.matrix_attention.linear_matrix_attention import LinearMatrixAttention
-from allennlp.nn import InitializerApplicator, util
-from allennlp.tools import squad_eval
-from allennlp.training.metrics import Average, BooleanAccuracy, CategoricalAccuracy
+from allennlp.modules import TextFieldEmbedder, FeedForward
+from allennlp.nn import InitializerApplicator, RegularizerApplicator
+from allennlp.training.metrics import CategoricalAccuracy
 
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
@@ -63,25 +57,23 @@ class CSQABert(Model):
 
         check_dimensions_match(text_field_embedder.get_output_dim(), output_logit.get_input_dim(),
                                "text field embedding dim", "output_logit input dim")
-        check_dimensions_match(output_logit.get_output_dim(), 3,
-                               "output_logit output dim", "number of answer choices")
 
         self._accuracy = CategoricalAccuracy()
         self._loss = torch.nn.CrossEntropyLoss()
 
         initializer(self)
 
-        def forward(self,  # type: ignore
-                    sentence_pair: Dict[str, torch.LongTensor],
-                    answer_index: torch.IntTensor = None,
-                    metadata: List[Dict[str, Any]
-                                   ] = None  # pylint:disable=unused-argument
-                    ) -> Dict[str, torch.Tensor]:
+    def forward(self,  # type: ignore
+                qa_pairs: Dict[str, torch.LongTensor],
+                answer_index: torch.IntTensor = None,
+                metadata: List[Dict[str, Any]
+                               ] = None  # pylint:disable=unused-argument
+                ) -> Dict[str, torch.Tensor]:
             # pylint: disable=arguments-differ
         """
         Parameters
         ----------
-        sentence_pair : Dict[str, torch.LongTensor]
+        qa_pairs : Dict[str, torch.LongTensor]
             From a ``ListField``.
         answer_index : ``torch.IntTensor``, optional
             From an ``IndexField``.  This is what we are trying to predict.
@@ -107,23 +99,20 @@ class CSQABert(Model):
         loss : torch.FloatTensor, optional
             A scalar loss to be optimised.
         """
-        embeded = self._text_field_embedder(sentence_pair, num_wrapping_dims=1)
-        print('embeded size:', embeded.size())
-        import sys
-        sys.exit(0)
+        cls_hidden = self._text_field_embedder(qa_pairs, num_wrapping_dims=1)
 
-        cls_hidden = embeded[:, 0, :]
         if self.dropout:
             cls_hidden = self.dropout(cls_hidden)
 
         # the final MLP -- apply dropout to input, and MLP applies to hidden
-        answer_logits = self._output_logit(cls_hidden)
+        answer_logits = self._output_logit(cls_hidden).squeeze(-1)
         answer_probs = torch.nn.functional.softmax(answer_logits, dim=-1)
-
+        qids = [m['qid'] for m in metadata]
         output_dict = {"answer_logits": answer_logits,
-                       "answer_probs": answer_probs}
-
-        if label is not None:
+                       "answer_probs": answer_probs,
+                       "qid": qids}
+        answer_index = answer_index.squeeze(-1)
+        if answer_index is not None:
             loss = self._loss(answer_logits, answer_index)
             self._accuracy(answer_logits, answer_index)
             output_dict["loss"] = loss

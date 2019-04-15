@@ -1,8 +1,8 @@
 local split = "RandSplit"; // QTokenSplit | RandSplit
 local bert_type = "base"; // base | large
-local run_env = 'docker'; // local | docker
+local run_env = 'local'; // local | docker
 
-local batch_size_base = 16; // 8g GPU mem required
+local batch_size_base = 10; // 8g GPU mem required
 local batch_size_large = 5; // 16g GPU mem required
 local feature_size_base = 768;
 local feature_size_large = 1024;
@@ -26,9 +26,11 @@ local feature_size = if bert_type == 'base' then feature_size_base else feature_
             }
         }
     },
-    "train_data_path": data_root + "/csqa/" + split + "/train_rand_split.jsonl",
-    "validation_data_path": data_root + "/csqa/" + split + "/dev_rand_split.jsonl",
-    "test_data_path": data_root + "/csqa/" + split + "/test_rand_split_no_answers.jsonl",
+    // "train_data_path": data_root + "/csqa/" + split + "/train_rand_split.jsonl",
+    // "validation_data_path": data_root + "/csqa/" + split + "/dev_rand_split.jsonl",
+    "train_data_path": 'csqa/tests/fixtures/csqa_sample.jsonl',
+    "validation_data_path": 'csqa/tests/fixtures/csqa_sample.jsonl',
+    // "test_data_path": data_root + "/csqa/" + split + "/test_rand_split_no_answers.jsonl",
     "evaluate_on_test": false,
     "model": {
         "type": "csqa-bert",
@@ -59,8 +61,15 @@ local feature_size = if bert_type == 'base' then feature_size_base else feature_
         }
     },
     "iterator": {
-        "type": "basic",
-        "batch_size": batch_size
+        "type": "bucket",
+        "sorting_keys": [
+            [
+                "qa_pairs",
+                "list_num_tokens"
+            ]
+        ],
+        "batch_size": batch_size,
+        "padding_noise": 0
     },
     "trainer": {
         "optimizer": {
@@ -68,10 +77,11 @@ local feature_size = if bert_type == 'base' then feature_size_base else feature_
             "lr": 2e-5
         },
         "validation_metric": "+accuracy",
-        "num_serialized_models_to_keep": 1,
+        "num_serialized_models_to_keep": 2,
         "num_epochs": 3,
         "grad_norm": 10.0,
-        "cuda_device": 0,
+        "patience": 3,
+        "cuda_device": -1,
         "learning_rate_scheduler": {
             "type": "reduce_on_plateau",
             "factor": 0.5,
