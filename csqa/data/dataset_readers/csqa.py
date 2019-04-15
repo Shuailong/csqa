@@ -14,7 +14,7 @@ from overrides import overrides
 
 from allennlp.common.file_utils import cached_path
 from allennlp.data.dataset_readers.dataset_reader import DatasetReader
-from allennlp.data.fields import Field, TextField, LabelField, MetadataField, ListField, IndexField
+from allennlp.data.fields import Field, TextField, MetadataField, ListField, IndexField
 from allennlp.data.instance import Instance
 from allennlp.data.token_indexers import SingleIdTokenIndexer, TokenIndexer
 from allennlp.data.tokenizers import Tokenizer, WordTokenizer, Token
@@ -60,7 +60,7 @@ class CSQAReader(DatasetReader):
                 question = example["question"]["stem"]
                 choices = [choice['text'] for choice in sorted(
                     example["question"]["choices"], key=lambda c: c['label'])]
-                answer = example['answerKey']
+                answer = example['answerKey'] if 'answerKey' in example else None
                 yield self.text_to_instance(qid, question, choices, answer)
 
     @overrides

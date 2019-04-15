@@ -6,4 +6,4 @@
 # @Last Modified by:  Shuailong
 # @Last Modified time: 2019-04-06 23:38:12
 
-from spm.data.token_indexers.wordpiece_indexer import PretrainedBertIndexer
+from csqa.data.token_indexers.wordpiece_indexer import PretrainedBertIndexer

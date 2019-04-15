@@ -19,7 +19,7 @@ class TestCSQAReader:
             str(self.FIXTURES_ROOT / 'csqa_sample.jsonl'))
         instances = ensure_list(instances)
 
-        assert len(instances) == 20
+        assert len(instances) == 10
         tokens = [t.text for t in instances[0].fields['qa_pairs'][3]]
         assert tokens == ['[CLS]', 'What', 'is', 'someone', 'doing', 'if', 'he', 'or', 'she', 'is', 'sitting',
                           'quietly', 'and', 'his', 'or', 'her', 'eyes', 'are', 'moving', '?', '[SEP]', 'fall', 'asleep', '[SEP]']

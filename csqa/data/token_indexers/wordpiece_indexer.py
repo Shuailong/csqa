@@ -11,10 +11,10 @@ from typing import List
 import logging
 
 
-from spm.data.tokenizers import BertTokenizer
-
 from allennlp.data.token_indexers.token_indexer import TokenIndexer
 from allennlp.data.token_indexers import WordpieceIndexer
+
+from csqa.data.tokenizers import BertTokenizer
 
 logger = logging.getLogger(__name__)
 
@@ -66,7 +66,8 @@ class PretrainedBertIndexer(WordpieceIndexer):
             logger.warning("Your BERT model appears to be uncased, "
                            "but your indexer is not lowercasing tokens.")
 
-        bert_tokenizer = BertTokenizer.from_pretrained(pretrained_model, do_lower_case=do_lowercase, do_basic_tokenize=False)
+        bert_tokenizer = BertTokenizer.from_pretrained(
+            pretrained_model, do_lower_case=do_lowercase, do_basic_tokenize=False)
         super().__init__(vocab=bert_tokenizer.vocab,
                          wordpiece_tokenizer=bert_tokenizer.wordpiece_tokenizer.tokenize,
                          namespace="bert",
@@ -77,4 +78,3 @@ class PretrainedBertIndexer(WordpieceIndexer):
                          start_tokens=start_tokens,
                          end_tokens=end_tokens,
                          separator_token=separator_token)
-
