@@ -111,8 +111,9 @@ class CSQABert(Model):
         output_dict = {"answer_logits": answer_logits,
                        "answer_probs": answer_probs,
                        "qid": qids}
-        answer_index = answer_index.squeeze(-1)
+
         if answer_index is not None:
+            answer_index = answer_index.squeeze(-1)
             loss = self._loss(answer_logits, answer_index)
             self._accuracy(answer_logits, answer_index)
             output_dict["loss"] = loss
