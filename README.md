@@ -101,3 +101,11 @@ python scripts/get_prediction.py  models/20190415-base/test_rand_split_predictio
 # use gold label to calculate the metrics
 python evaluator.py -qa data/csqa/RandSplit/test_rand_split_answers.jsonl -p models/20190415-base/test_rand_split_predictions.csv -o metrics.json
 ```
+
+### Baseline Result
+| Model      | train acc    | dev acc      | test acc |
+| ---------- | ------------ | ------------ | -------- |
+| bert-base  | 0.8000205318 | 0.5757575758 | *0.53*   |
+| bert-large | 0.8878965199 | 0.6216216216 | *0.567*  |
+| CoS-E      | -            | -            | *0.582*  |
+ *italic numbers* are from leaderboard.
