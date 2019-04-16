@@ -87,9 +87,17 @@ allennlp train experiments/bert.jsonnet -s models/20190415-base  --include-packa
 ### Predict
 #### on docker
 ```bash
-nvidia-docker run --rm -v "/home/long/csqa:/mnt/csqa"  shuailongliang/csqa:latest predict /mnt/csqa/models/20190415-base/model.tar.gz  /mnt/csqa/data/csqa/RandSplit/test_rand_split_no_answers.jsonl --output-file /mnt/csqa/models/20190415-base/test_rand_split_answer.txt --cuda-device 0 --predictor csqa --include-package csqa
+nvidia-docker run --rm -v "/home/long/csqa:/mnt/csqa"  shuailongliang/csqa:latest predict /mnt/csqa/models/20190415-base/model.tar.gz  /mnt/csqa/data/csqa/RandSplit/test_rand_split_no_answers.jsonl --output-file /mnt/csqa/models/20190415-base/test_rand_split_prediction_logits.jsonl --cuda-device 0 --predictor csqa --include-package csqa
 ```
 #### on local GPU machine
 ```bash
-allennlp predict models/20190415-base/model.tar.gz data/csqa/RandSplit/test_rand_split_no_answers.jsonl --output-file models/20190415-base/test_rand_split_answer.txt --cuda-device 0 --predictor csqa --include-package csqa 
+allennlp predict models/20190415-base/model.tar.gz data/csqa/RandSplit/test_rand_split_no_answers.jsonl --output-file models/20190415-base/test_rand_split_prediction_logits.jsonl --cuda-device 0 --predictor csqa --include-package csqa 
+```
+
+### Evaluate
+```bash
+# transform logits to answer label
+python scripts/get_prediction.py  models/20190415-base/test_rand_split_prediction_logits.jsonl models/20190415-base/test_rand_split_predictions.csv
+# use gold label to calculate the metrics
+python evaluator.py -qa data/csqa/RandSplit/test_rand_split_answers.jsonl -p models/20190415-base/test_rand_split_predictions.csv -o metrics.json
 ```
