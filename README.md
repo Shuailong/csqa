@@ -59,6 +59,7 @@ The codebase for project [commonsenseqa][commonsense-qa-website].
     |    |---RandSplit
     |             |
     |             |--train_rand_split.jsonl
+    |             |--train_rand_split_EASY.jsonl
     |             |--dev_rand_split.jsonl
     |             |--dev_rand_split_EASY.jsonl
     |             |--test_rand_split_no_answers.jsonl
@@ -99,13 +100,13 @@ allennlp predict models/20190415-base/model.tar.gz data/csqa/RandSplit/test_rand
 # transform logits to answer label
 python scripts/get_prediction.py  models/20190415-base/test_rand_split_prediction_logits.jsonl models/20190415-base/test_rand_split_predictions.csv
 # use gold label to calculate the metrics
-python evaluator.py -qa data/csqa/RandSplit/test_rand_split_answers.jsonl -p models/20190415-base/test_rand_split_predictions.csv -o metrics.json
+python evaluator/evaluator.py -qa data/csqa/RandSplit/test_rand_split_answers.jsonl -p models/20190415-base/test_rand_split_predictions.csv -o dev_rand_split_score.json
 ```
 
 ### Baseline Result
-| Model      | train acc    | dev acc      | test acc |
-| ---------- | ------------ | ------------ | -------- |
-| bert-base  | 0.8000205318 | 0.5757575758 | *0.53*   |
-| bert-large | 0.8878965199 | 0.6216216216 | *0.567*  |
-| CoS-E      | -            | -            | *0.582*  |
+| Model      | train acc    | dev acc      | test acc  |
+| ---------- | ------------ | ------------ | --------- |
+| bert-base  | 0.8000205318 | 0.5757575758 | *0.53*    |
+| bert-large | 0.8878965199 | 0.6216216216 | *0.567*   |
+| CoS-E      | -            | -            | **0.582** |
  *italic numbers* are from leaderboard.
