@@ -7,20 +7,22 @@
 # @Last Modified time: 2019-04-16 10:58:21
 
 import json
-import numpy as np
 import argparse
 
 
+LABELS = 'ABCDE'
+
+
 def main(args):
-    print(args)
     with open(args.input_file) as fin, open(args.output_file, 'w') as fout:
         for line in fin:
             jsondict = json.loads(line)
             qid = jsondict['qid']
             probs = jsondict['answer_probs']
-            answer_index = np.argmax(probs)
-            answer_label = ['A', 'B', 'C', 'D', 'E'][answer_index]
-            fout.write(f'{qid},{answer_label}\n')
+            max_prob = max(probs)
+            answer_indexs = [i for i in range(5) if probs[i] == max_prob]
+            answer_labels = [LABELS[i] for i in answer_indexs]
+            fout.write(f"{qid},{';'.join(answer_labels)}\n")
 
 
 def str2bool(v):
