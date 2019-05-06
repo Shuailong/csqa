@@ -73,7 +73,7 @@ class CSQAReader(DatasetReader):
         fields: Dict[str, Field] = {}
         question_tokens = self._tokenizer.tokenize(question)
         choice_tokens = self._tokenizer.batch_tokenize(choices)
-        qa_pair_tokens = [[Token("[CLS]")] + question_tokens + [Token("[SEP]")] + tokens + [Token("[SEP]")]
+        qa_pair_tokens = [question_tokens + [Token("[SEP]")] + tokens
                           for tokens in choice_tokens]
         qa_pairs_field = ListField(
             [TextField(tokens, self._token_indexers) for tokens in qa_pair_tokens])

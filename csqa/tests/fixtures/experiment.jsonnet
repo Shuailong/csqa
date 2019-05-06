@@ -21,7 +21,7 @@ local feature_size = if bert_type == 'base' then feature_size_base else feature_
         },
         "token_indexers": {
             "bert": {
-                "type": "bert-pretrained-sl",
+                "type": "bert-pretrained",
                 "pretrained_model": data_root + "/bert/bert-"+bert_type+"-uncased-vocab.txt"
             }
         }
@@ -34,7 +34,7 @@ local feature_size = if bert_type == 'base' then feature_size_base else feature_
     "evaluate_on_test": false,
     "model": {
         "type": "csqa-bert",
-        "dropout": 0.1,
+        "dropout": 0,
         "text_field_embedder": {
             "allow_unmatched_keys": true,
             "embedder_to_indexer_map": {
@@ -46,10 +46,9 @@ local feature_size = if bert_type == 'base' then feature_size_base else feature_
             },
             "token_embedders": {
                 "bert": {
-                    "type": "bert-pretrained-sl",
+                    "type": "bert-pretrained",
                     "pretrained_model": data_root + "/bert/bert-"+bert_type+"-uncased.tar.gz",
-                    "requires_grad": true,
-                    "pool": true
+                    "requires_grad": false,
                 }
             }
         },

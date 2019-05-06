@@ -21,8 +21,8 @@ class TestCSQAReader:
 
         assert len(instances) == 10
         tokens = [t.text for t in instances[0].fields['qa_pairs'][3]]
-        assert tokens == ['[CLS]', 'What', 'is', 'someone', 'doing', 'if', 'he', 'or', 'she', 'is', 'sitting',
-                          'quietly', 'and', 'his', 'or', 'her', 'eyes', 'are', 'moving', '?', '[SEP]', 'fall', 'asleep', '[SEP]']
+        assert tokens == ['What', 'is', 'someone', 'doing', 'if', 'he', 'or', 'she', 'is', 'sitting',
+                          'quietly', 'and', 'his', 'or', 'her', 'eyes', 'are', 'moving', '?', '[SEP]', 'fall', 'asleep']
         assert instances[0].fields['answer_index'].sequence_index == 1
 
     def test_can_build_from_params(self):

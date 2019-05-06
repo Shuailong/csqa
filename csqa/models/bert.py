@@ -100,7 +100,7 @@ class CSQABert(Model):
             A scalar loss to be optimised.
         """
         cls_hidden = self._text_field_embedder(qa_pairs, num_wrapping_dims=1)
-
+        cls_hidden = cls_hidden[:, 0, :]
         if self.dropout:
             cls_hidden = self.dropout(cls_hidden)
 
