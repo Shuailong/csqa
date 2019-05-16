@@ -1,12 +1,12 @@
 local split = "RandSplit"; // QTokenSplit | RandSplit
-local bert_type = "base"; // base | large
+local bert_type = "large"; // base | large
 local run_env = 'docker'; // local | docker
 
 local batch_size_base = 16; // 8g GPU mem required
 local batch_size_large = 5; // 16g GPU mem required
 local feature_size_base = 768;
 local feature_size_large = 1024;
-local data_root = if run_env == 'local' then 'data' else '/mnt/csqa/data';
+local data_root = if run_env == 'local' then '/Users/handsome/Workspace/data' else '/mnt/csqa/data';
 local batch_size = if bert_type == 'base' then batch_size_base else batch_size_large;
 local feature_size = if bert_type == 'base' then feature_size_base else feature_size_large;
 
@@ -90,7 +90,7 @@ local feature_size = if bert_type == 'base' then feature_size_base else feature_
         "num_serialized_models_to_keep": 1,
         "num_epochs": 3,
         "grad_norm": 10.0,
-        "cuda_device": 4,
+        "cuda_device": 1,
         "learning_rate_scheduler": {
             "type": "reduce_on_plateau",
             "factor": 0.5,

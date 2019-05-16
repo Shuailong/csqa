@@ -4,6 +4,7 @@ import pathlib
 
 from allennlp.common.testing import ModelTestCase
 from allennlp.data.dataset import Batch
+from csqa.models import CSQABert
 
 
 class CSQABertTest(ModelTestCase):
@@ -87,9 +88,9 @@ class CSQABertTest(ModelTestCase):
         assert "qid" in output_dict and "loss" in output_dict
         assert "answer_logits" in output_dict and "answer_probs" in output_dict
 
-    def test_model_can_train_save_and_load(self):
-        self.ensure_model_can_train_save_and_load(
-            self.param_file)
+    # def test_model_can_train_save_and_load(self):
+    #     self.ensure_model_can_train_save_and_load(
+    #         self.param_file)
 
     # @flaky(max_runs=3)
     # def test_batch_predictions_are_consistent(self):

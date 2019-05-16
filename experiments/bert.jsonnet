@@ -6,7 +6,7 @@ local batch_size_base = 16; // 8g GPU mem required
 local batch_size_large = 5; // 16g GPU mem required
 local feature_size_base = 768;
 local feature_size_large = 1024;
-local data_root = if run_env == 'local' then 'data' else '/mnt/csqa/data';
+local data_root = if run_env == 'local' then '/Users/handsome/Workspace/' else '/mnt/csqa/data';
 local batch_size = if bert_type == 'base' then batch_size_base else batch_size_large;
 local feature_size = if bert_type == 'base' then feature_size_base else feature_size_large;
 
