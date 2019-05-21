@@ -101,7 +101,9 @@ class SearchEngine():
         return batch_res
 
     @staticmethod
-    def pprint(top_sents: List[Dict[str, Union[float, str]]]) -> None:
+    def pprint(top_sents: List[Dict[str, Union[float, str]]],
+               title_max_len: int = 30,
+               sent_max_len: int = 100) -> None:
         """Print the results returned by the search engine.
 
         Parameters
@@ -117,10 +119,12 @@ class SearchEngine():
         table = prettytable.PrettyTable(headers)
         for i, result in enumerate(top_sents):
             sent = result['sentence']
-            sent = sent[:100] + ' ...' if len(sent) > 100 else sent
+            sent = sent[:sent_max_len] + \
+                ' ...' if len(sent) > sent_max_len else sent
             if result['title']:
                 origin = result['title']
-                origin = origin[:30] + ' ...' if len(origin) > 30 else origin
+                origin = origin[:title_max_len] + \
+                    ' ...' if len(origin) > title_max_len else origin
                 table.add_row([i, sent, origin, '%.5g' % result['score']])
             else:
                 table.add_row([i, sent, '%.5g' % result['score']])

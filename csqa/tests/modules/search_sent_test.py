@@ -1,5 +1,6 @@
 # pylint: disable=invalid-name,no-self-use,missing-docstring
 
+
 from termcolor import colored
 from allennlp.common.testing import AllenNlpTestCase
 
@@ -7,7 +8,6 @@ from csqa.modules.retriever import TfidfSentenceRanker
 
 
 class TestSentenceSearch(AllenNlpTestCase):
-    INDEX_ROOT = "/Users/handsome/Workspace/data/wikipedia/"
 
     def setUp(self):
         super(TestSentenceSearch, self).setUp()

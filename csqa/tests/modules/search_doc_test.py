@@ -1,17 +1,19 @@
 # pylint: disable=invalid-name,no-self-use,missing-docstring
+import os
+
 from allennlp.common.testing import AllenNlpTestCase
 from csqa.modules.retriever import LuceneSearch
+from csqa import DATA_DIR
 
 
 class TestLuceneSearch(AllenNlpTestCase):
-    INDEX_ROOT = "/Users/handsome/Workspace/data/wikipedia/"
+    INDEX_ROOT = os.path.join(DATA_DIR, "wikipedia/index")
 
     def setUp(self):
         super(TestLuceneSearch, self).setUp()
 
         self.search_engine = LuceneSearch(
-            index_dir=self.INDEX_ROOT + "index",
-            db_path=self.INDEX_ROOT + "docs.db",
+            index_dir=self.INDEX_ROOT,
             num_search_workers=20)
 
     def test_search_single(self):
