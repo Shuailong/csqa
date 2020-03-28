@@ -6,7 +6,7 @@
 # @Last Modified by: Shuailong
 # @Last Modified time: 2019-04-12 20:35:05
 
-from typing import Dict, List
+from typing import Dict, List, Union
 import json
 import logging
 
@@ -40,11 +40,13 @@ class CSQAReader(DatasetReader):
     def __init__(self,
                  tokenizer: Tokenizer = None,
                  token_indexers: Dict[str, TokenIndexer] = None,
-                 lazy: bool = False) -> None:
+                 lazy: bool = False,
+                 num_evidences: int = 1) -> None:
         super().__init__(lazy)
         self._tokenizer = tokenizer or WordTokenizer()
         self._token_indexers = token_indexers or {
             'tokens': SingleIdTokenIndexer()}
+        self.num_evidences = num_evidences
 
     @overrides
     def _read(self, file_path: str):
@@ -55,26 +57,52 @@ class CSQAReader(DatasetReader):
             logger.info(
                 "Reading CSQA instances from jsonl dataset at: %s", file_path)
             for line in snli_file:
-                example = json.loads(line)
-                qid = example["id"]
-                question = example["question"]["stem"]
+                sample = json.loads(line)
+                qid = sample["id"]
+                question = sample["question"]["stem"]
                 choices = [choice['text'] for choice in sorted(
-                    example["question"]["choices"], key=lambda c: c['label'])]
-                answer = example['answerKey'] if 'answerKey' in example else None
-                yield self.text_to_instance(qid, question, choices, answer)
+                    sample["question"]["choices"], key=lambda c: c['label'])]
+                answer = sample['answerKey'] if 'answerKey' in sample else None
+
+                if 'evidence_ranked' in sample['question']['choices'][0]:
+                    choice_evidences = [choice['evidence_ranked'] for choice in sorted(
+                        sample["question"]["choices"], key=lambda c: c['label'])]
+                else:
+                    choice_evidences = None
+
+                yield self.text_to_instance(qid, question, choices,
+                                            choice_evidences=choice_evidences,
+                                            answer=answer)
 
     @overrides
     def text_to_instance(self,  # type: ignore
                          qid: str,
                          question: str,
                          choices: List[str],
+                         choice_evidences: List[Union[str, List[str]]] = None,
                          answer: str = None) -> Instance:
         # pylint: disable=arguments-differ
         fields: Dict[str, Field] = {}
         question_tokens = self._tokenizer.tokenize(question)
         choice_tokens = self._tokenizer.batch_tokenize(choices)
-        qa_pair_tokens = [question_tokens + [Token("[SEP]")] + tokens
-                          for tokens in choice_tokens]
+
+        qa_pair_tokens = []
+        for i, c_tokens in enumerate(choice_tokens):
+            qa_pair = question_tokens + [Token("[SEP]")] + c_tokens
+            evidence_tokens = []
+            if choice_evidences and choice_evidences[i]:
+                choice_evidence_sents = [
+                    evi for evi, _ in choice_evidences[i][:self.num_evidences]]
+                evidence_tokens = self._tokenizer.batch_tokenize(
+                    choice_evidence_sents)
+                evidence_tokens_flat = [
+                    t for evi in evidence_tokens for t in evi]
+            else:
+                evidence_tokens_flat = []
+            if evidence_tokens_flat:
+                qa_pair += [Token("[SEP]")] + evidence_tokens_flat
+            qa_pair_tokens.append(qa_pair)
+
         qa_pairs_field = ListField(
             [TextField(tokens, self._token_indexers) for tokens in qa_pair_tokens])
         if answer:

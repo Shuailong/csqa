@@ -37,7 +37,7 @@ local feature_size = if bert_type == 'base' then feature_size_base else feature_
     "model": {
         "type": "csqa-bert-emb",
         "dropout": 0.1,
-        "text_field_embedder": {
+        "bert": {
             "allow_unmatched_keys": true,
             "embedder_to_indexer_map": {
                 "bert": [
@@ -64,7 +64,7 @@ local feature_size = if bert_type == 'base' then feature_size_base else feature_
                 },
             }
         },
-        "output_logit": {
+        "classifier": {
             "input_dim": feature_size + 300,
             "num_layers": 1,
             "hidden_dims": 1,

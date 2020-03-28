@@ -1,0 +1,10 @@
+Where is the large area location of the empire state building?||*Something you find in New York City is the Empire State Building||new york city||1
+Where can you buy jeans at one of may indoor merchants?||You are likely to find jeans in a Gap||gap||0
+Where can you buy jeans at one of may indoor merchants?||You are likely to find a closet in a bedroom||bedroom||0
+Where can you buy jeans at one of may indoor merchants?||You are likely to find a disposable razor in a bathroom||bathroom||0
+Where can you buy jeans at one of may indoor merchants?||You are likely to find a shopping mall in a suburban area||shopping mall||1
+Where can you buy jeans at one of may indoor merchants?||You are likely to find jeans in a Laundromat||laundromat||0
+What to kids do for boredom on a ramp?||If you want to skateboard then you should get a skateboard||skateboard||1
+What to kids do for boredom on a ramp?||boredom would make you want to go skiing||go skiing||0
+What to kids do for boredom on a ramp?||If you want to watch a film then you should go to a movie theatre||watch film||0
+What to kids do for boredom on a ramp?||The first thing you do when you hang out at the bar is go dance||hang out at bar||0

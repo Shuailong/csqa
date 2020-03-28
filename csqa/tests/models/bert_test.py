@@ -4,6 +4,7 @@ import pathlib
 
 from allennlp.common.testing import ModelTestCase
 from allennlp.data.dataset import Batch
+from csqa.data.dataset_readers import CSQAReader
 from csqa.models import CSQABert
 
 

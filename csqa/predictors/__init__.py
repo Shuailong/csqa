@@ -1,1 +1,2 @@
 from csqa.predictors.csqa import CSQAPredictor
+from csqa.predictors.evidence_selector import EvidenceSelectorPredictor

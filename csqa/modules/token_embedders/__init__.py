@@ -1,1 +1,1 @@
-from csqa.modules.token_embedders.bert_token_embedder import PretrainedBertEmbedder
+from csqa.modules.token_embedders.bert_nsp_token_embedder import PretrainedBertNSPEmbedder

@@ -26,7 +26,7 @@ class CSQABert(Model):
     """
     This class implements baseline Bert model for commonsenseqa dataset descibed in NAACL 2019 paper
     CommonsenseQA: A Question Answering Challenge Targeting Commonsense Knowledge [https://arxiv.org/abs/1811.00937].
-    In this set-up, a single instance is a list of question answer pairs, and an answer index to indicate 
+    In this set-up, a single instance is a list of question answer pairs, and an answer index to indicate
     which one is correct.
 
     Parameters
@@ -40,23 +40,28 @@ class CSQABert(Model):
     """
 
     def __init__(self, vocab: Vocabulary,
-                 text_field_embedder: TextFieldEmbedder,
-                 output_logit: FeedForward,
+                 bert: TextFieldEmbedder,
+                 classifier: FeedForward,
                  dropout: float = 0.1,
                  initializer: InitializerApplicator = InitializerApplicator(),
                  regularizer: Optional[RegularizerApplicator] = None) -> None:
         super().__init__(vocab, regularizer)
 
-        self._text_field_embedder = text_field_embedder
-        self._output_logit = output_logit
+        self._bert = bert
+        self._classifier = classifier
 
         if dropout:
             self.dropout = torch.nn.Dropout(dropout)
         else:
             self.dropout = None
 
-        check_dimensions_match(text_field_embedder.get_output_dim(), output_logit.get_input_dim(),
-                               "text field embedding dim", "output_logit input dim")
+        self._pooler = FeedForward(input_dim=bert.get_output_dim(),
+                                   num_layers=1,
+                                   hidden_dims=bert.get_output_dim(),
+                                   activations=torch.tanh)
+
+        check_dimensions_match(bert.get_output_dim(), classifier.get_input_dim(),
+                               "bert embedding dim", "classifier input dim")
 
         self._accuracy = CategoricalAccuracy()
         self._loss = torch.nn.CrossEntropyLoss()
@@ -70,42 +75,48 @@ class CSQABert(Model):
                                ] = None  # pylint:disable=unused-argument
                 ) -> Dict[str, torch.Tensor]:
             # pylint: disable=arguments-differ
-        """
-        Parameters
+        """ Parameters
         ----------
-        qa_pairs : Dict[str, torch.LongTensor]
-            From a ``ListField``.
-        answer_index : ``torch.IntTensor``, optional
-            From an ``IndexField``.  This is what we are trying to predict.
-            If this is given, we will compute a loss that gets included in the output dictionary.
-        metadata : ``List[Dict[str, Any]]``, optional
-            If present, this should contain the question ID, question and choices for each instance 
-            in the batch. The length of this list should be the batch size, and each dictionary 
-            should have the keys ``qid``, ``question``, ``choices``, ``question_tokens`` and 
-            ``choices_tokens``.
+        qa_pairs: Dict[str, torch.LongTensor]
+        From a ``ListField``.
+        answer_index: ``torch.IntTensor``, optional
+        From an ``IndexField``.  This is what we are trying to predict.
+        If this is given, we will compute a loss that gets included in the output dictionary.
+        metadata: ``List[Dict[str, Any]]``, optional
+        If present, this should contain the question ID, question and choices for each instance
+        in the batch. The length of this list should be the batch size, and each dictionary
+        should have the keys ``qid``, ``question``, ``choices``, ``question_tokens`` and
+        ``choices_tokens``.
 
         Returns
         -------
         An output dictionary consisting of the followings.
 
-        qid : List[str]
-            A list consisting of question ids.
-        answer_logits : torch.FloatTensor
-            A tensor of shape ``(batch_size, num_options=5)`` representing unnormalised log
-            probabilities of the choices.
-        answer_probs : torch.FloatTensor
-            A tensor of shape ``(batch_size, num_options=5)`` representing probabilities of the
-            choices.
-        loss : torch.FloatTensor, optional
-            A scalar loss to be optimised.
+        qid: List[str]
+        A list consisting of question ids.
+        answer_logits: torch.FloatTensor
+        A tensor of shape ``(batch_size, num_options=5)`` representing unnormalised log
+        probabilities of the choices.
+        answer_probs: torch.FloatTensor
+        A tensor of shape ``(batch_size, num_options=5)`` representing probabilities of the
+        choices.
+        loss: torch.FloatTensor, optional
+        A scalar loss to be optimised. 
         """
-        cls_hidden = self._text_field_embedder(qa_pairs, num_wrapping_dims=1)
-        cls_hidden = cls_hidden[:, 0, :]
+
+        # batch, 5, seq_len
+        cls_hidden = self._bert(qa_pairs, num_wrapping_dims=1)
+        # batch, 5, seq_len, hidden
+        cls_hidden = cls_hidden[:, :, 0, :]
+        # batch, 5, hidden
+        cls_hidden = self._pooler(cls_hidden)
+        # batch, 5, hidden
+
         if self.dropout:
             cls_hidden = self.dropout(cls_hidden)
 
         # the final MLP -- apply dropout to input, and MLP applies to hidden
-        answer_logits = self._output_logit(cls_hidden).squeeze(-1)
+        answer_logits = self._classifier(cls_hidden).squeeze(-1)
         answer_probs = torch.nn.functional.softmax(answer_logits, dim=-1)
         qids = [m['qid'] for m in metadata]
         output_dict = {"answer_logits": answer_logits,

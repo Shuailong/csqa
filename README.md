@@ -7,8 +7,17 @@ The codebase for project [commonsenseqa][commonsense-qa-website].
 [commonsense-qa-leaderboard]: https://www.tau-nlp.org/csqa-leaderboard
 [commonsense-qa-website]: https://www.tau-nlp.org/commonsenseqa
 [commonsense-qa-github]: https://github.com/jonathanherzig/commonsenseqa
+[conceptnet embedding]: https://github.com/commonsense/conceptnet-numberbatch
 
-### Data Sample
+## Dataset Statistics
+
+| Train | Dev  | Test |
+| ----- | ---- | ---- |
+| 9741  | 1221 | 1140 |
+
+
+## Data Sample
+
 ```json
 {
     "answerKey": "B",
@@ -42,8 +51,8 @@ The codebase for project [commonsenseqa][commonsense-qa-website].
 ```
 
 ### Data Prepare
-<pre>
 
+<pre>
 |--data
     |
     |--csqa
@@ -74,28 +83,36 @@ The codebase for project [commonsenseqa][commonsense-qa-website].
 ### Train
 
 #### on docker
+
 ```bash
 # pull docker
 docker pull shuailongliang/csqa:latest
 # start training 
 nvidia-docker run --rm -v "/home/long/csqa:/mnt/csqa"  shuailongliang/csqa:latest train -s /mnt/csqa/models/20190415-base /mnt/csqa/experiments/bert.jsonnet --include-package csqa
 ```
+
 #### on local GPU machine
+
 ```bash
 allennlp train experiments/bert.jsonnet -s models/20190415-base  --include-package csqa 
 ```
 
 ### Predict
+
 #### on docker
+
 ```bash
 nvidia-docker run --rm -v "/home/long/csqa:/mnt/csqa"  shuailongliang/csqa:latest predict /mnt/csqa/models/20190415-base/model.tar.gz  /mnt/csqa/data/csqa/RandSplit/test_rand_split_no_answers.jsonl --output-file /mnt/csqa/models/20190415-base/test_rand_split_prediction_logits.jsonl --cuda-device 0 --predictor csqa --include-package csqa
 ```
+
 #### on local GPU machine
+
 ```bash
 allennlp predict models/20190415-base/model.tar.gz data/csqa/RandSplit/test_rand_split_no_answers.jsonl --output-file models/20190415-base/test_rand_split_prediction_logits.jsonl --cuda-device 0 --predictor csqa --include-package csqa 
 ```
 
 ### Evaluate
+
 ```bash
 # transform logits to answer label
 python scripts/get_prediction.py  models/20190415-base/test_rand_split_prediction_logits.jsonl models/20190415-base/test_rand_split_predictions.csv
@@ -104,9 +121,11 @@ python evaluator/evaluator.py -qa data/csqa/RandSplit/test_rand_split_answers.js
 ```
 
 ### Baseline Result
+
 | Model      | train acc    | dev acc      | test acc  |
 | ---------- | ------------ | ------------ | --------- |
 | bert-base  | 0.8000205318 | 0.5757575758 | *0.53*    |
 | bert-large | 0.8878965199 | 0.6216216216 | *0.567*   |
 | CoS-E      | -            | -            | **0.582** |
  *italic numbers* are from leaderboard.
+
